@@ -1,0 +1,29 @@
+# Hidden files
+.*
+
+*.log
+*.pyc
+*.swp
+*.ipynb
+*.ipynb_checkpoints
+
+# Docker components
+docker-compose.yml
+
+# Generally ignore data directories
+**/data
+
+!tagging/entities/data
+!speller/data
+
+# Not needed for production
+analysis
+experiments
+tests
+
+# Secrets
+.env
+
+# Docs
+*.md
+k8s
