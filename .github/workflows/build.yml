@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Disk
+        if: always()
+        run: |
+          df -ah
+
       - uses: actions/checkout@v2
 
       # This is the a separate action that sets up buildx runner
@@ -42,50 +47,51 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
+#      - name: Login to GitHub Container Registry
+#        uses: docker/login-action@v1
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Push image to GitHub Container Registry
+#        run: |
+#          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+#
+#          # Change all uppercase to lowercase
+#          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+#
+#          # Strip git ref prefix from version
+#          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+#
+#          # Strip "v" prefix from tag name
+#          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+#
+#          # Use Docker `latest` tag convention
+#          [ "$VERSION" == "main" ] && VERSION=latest
+#
+#          echo IMAGE_ID=$IMAGE_ID
+#          echo VERSION=$VERSION
+#
+#          echo Listing docker images...
+#          docker image ls
+#
+#          echo Tagging image...
+#          docker tag $IMAGE_NAME:latest $IMAGE_ID:$VERSION
+#          echo Tagged image successfully!
+#
+#          echo Pushing image...
+#          docker push $IMAGE_ID:$VERSION
+#          echo Pushed image successfully!
       - name: List images
         if: always()
         run: |
           docker image ls -a --digests --no-trunc
-
-      - name: Disk space
+      -
+        name: Disk
         if: always()
         run: |
           df -ah
-
-      - name: Push image to GitHub Container Registry
-        run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
-
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-
-          echo Tagging image...
-          docker tag $IMAGE_NAME:latest $IMAGE_ID:$VERSION
-          echo Tagged image successfully!
-
-          echo Pushing image...
-          docker push $IMAGE_ID:$VERSION
-          echo Pushed image successfully!
-
       - # Temp fix
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
